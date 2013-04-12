@@ -59,7 +59,7 @@ public class Init {
             }
 
 
-			Algorithm algo = new Algorithm(items, knapsackCapacity, popSize);
+			Algorithm algo = new Algorithm(items, relations, knapsackCapacity, popSize);
 			algo.start();
 			
 		} catch (FileNotFoundException e) {

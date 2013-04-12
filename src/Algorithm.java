@@ -1,9 +1,11 @@
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.HashMap;
 
 
 public class Algorithm {
 	DataElement[] allItems;
+    HashMap<TwoInt, Integer> relations;
 	int maxItems;
 	int knapsackCapacity;
 	Chromosome[] population;
@@ -11,8 +13,9 @@ public class Algorithm {
 	private int genCount = 0;
 	Random random = new Random();
 	
-	public Algorithm(DataElement[] allItems, int knapsackCapacity, int popSize){
+	public Algorithm(DataElement[] allItems, HashMap<TwoInt, Integer> relations, int knapsackCapacity, int popSize){
 		this.allItems = allItems;
+        this.relations = relations;
 		this.knapsackCapacity = knapsackCapacity;
 		this.maxItems = allItems.length;
 		this.popSize = popSize;
@@ -95,5 +98,38 @@ public class Algorithm {
 	public void findAndSetChildScore(Chromosome child){
 		// finds the total value by looking up all the relations and such
 		// calls setScore on the child
+
+        DataElement[] values = child.getItems();
+        TwoInt key;
+        int value = 0;
+
+        for(int i=0;i<values.length;i++)
+        {
+            value += values[i].getValue();
+        }
+
+        for(int l=0;l<values.length-1;l++)
+        {
+            for(int j=l+1;j<values.length;j++)
+            {
+                if(values[l].getValue() < values[j].getValue())
+                {
+                    key = new TwoInt(values[l].getValue(), values[j].getValue());
+                }
+                else
+                {
+                    key = new TwoInt(values[j].getValue(), values[l].getValue());
+                }
+
+                if(relations.containsKey(key))
+                {
+                    value -= values[l].getValue() + values[j].getValue();
+                    value += relations.get(key);
+                }
+            }
+        }
+
+        child.setTotalValue(value);
+
 	}
 }
