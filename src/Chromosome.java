@@ -28,6 +28,14 @@ public class Chromosome {
 	public int getTotalValue(){
 		return totalValue;
 	}
+
+    public void setTotalWeight(int totalWeight){
+        this.totalWeight = totalWeight;
+    }
+
+    public int getTotalWeight(){
+        return totalWeight;
+    }
 	
 	public DataElement[] getItems(){
 		return items;

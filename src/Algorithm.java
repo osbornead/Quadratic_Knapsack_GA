@@ -80,28 +80,37 @@ public class Algorithm {
 
         int length = parent1.length;
         int p1, p2;
+        int i = 0;
 
-        for(int i=0;i<length-1;i+=2)
+        while(i<length && child.getTotalWeight() < knapsackCapacity)
         {
-            p1 = random.nextInt(length);
-            p2 = random.nextInt(length);
-            while(parent1[p1].getID() == parent2[p2].getID())
-            {
-                p2 = random.nextInt(length);
-            }
-
-            while(contains(children[0].getItems(),parent1[p1]))
+            if(i%2 == 0)
             {
                 p1 = random.nextInt(length);
+
+                while(contains(child.getItems(),parent1[p1]))
+                {
+                    p1 = random.nextInt(length);
+                }
+                
+                child.addItem(parent1[p1]);
             }
 
-            while(contains(children[0].getItems(),parent2[p2]))
+            else
             {
                 p2 = random.nextInt(length);
-            }
+
+                while(contains(child.getItems(),parent2[p2]))
+                {
+                    p2 = random.nextInt(length);
+                }
             
-            child.addItem(parent1[p1]);
-            child.addItem(parent2[p2]);
+                child.addItem(parent2[p2]);
+            }
+
+            i++;
+
+            findAndSetChildWeight(child);
         }
             
         children[0] = child;        
@@ -143,6 +152,21 @@ public class Algorithm {
 			population[index+1] = child;
 	}
 	
+
+    public void findAndSetChildWeight(Chromosome child){
+        DataElement[] values = child.getItems();
+        int weight = 0;
+        
+        for(int i=0; i < values.length; i++)
+        {
+            weight += values[i].getWeight();
+        }
+
+        child.setTotalWeight(weight);
+    }
+
+
+
 	public void findAndSetChildScore(Chromosome child){
 		// finds the total value by looking up all the relations and such
 		// calls setScore on the child
