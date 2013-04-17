@@ -31,7 +31,8 @@ public class Init {
 			int itemCounter = 0;
 			while((line = itemsReader.readLine()) != null){
 				String[] splitLine = line.split(",");
-				items[itemCounter++] = new DataElement(Integer.parseInt(splitLine[0]), Integer.parseInt(splitLine[1]));
+                // Assume line is entered weight, value, ID. 
+				items[itemCounter++] = new DataElement(Integer.parseInt(splitLine[0]), Integer.parseInt(splitLine[1]), Integer.parseInt(splitLine[2]));
 			}
 			
             /*******************

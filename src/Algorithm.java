@@ -59,6 +59,11 @@ public class Algorithm {
 	 */
 	public Chromosome[] pickParents(){
 		Chromosome[] parents = new Chromosome[2];
+        
+        // parent 1 from first 10 of population.
+        parents[0] = population[random.nextInt(10)];
+        // parent 2 from first half of population
+        parents[1] = population[random.nextInt(popSize/2)];
 		
 		return parents;	
 	}
@@ -68,11 +73,54 @@ public class Algorithm {
 		// Should probably use mutation rate in here to see if we should
 		// mutate the created child or not.
 		Chromosome[] children = new Chromosome[1];
+        Chromosome child = new Chromosome(maxItems, knapsackCapacity);
 		
+        DataElement[] parent1 = parents[0].getItems();
+        DataElement[] parent2 = parents[1].getItems();
+
+        int length = parent1.length;
+        int p1, p2;
+
+        for(int i=0;i<length-1;i+=2)
+        {
+            p1 = random.nextInt(length);
+            p2 = random.nextInt(length);
+            while(parent1[p1].getID() == parent2[p2].getID())
+            {
+                p2 = random.nextInt(length);
+            }
+
+            while(contains(children[0].getItems(),parent1[p1]))
+            {
+                p1 = random.nextInt(length);
+            }
+
+            while(contains(children[0].getItems(),parent2[p2]))
+            {
+                p2 = random.nextInt(length);
+            }
+            
+            child.addItem(parent1[p1]);
+            child.addItem(parent2[p2]);
+        }
+            
+        children[0] = child;        
+
 		return children;
 	}
 	
-	public Chromosome mutate(Chromosome victim){
+	public boolean contains(DataElement[] child, DataElement item)
+    {
+        for(int i=0;i<child.length;i++)
+        {
+            if(child[i].getID() == item.getID()) return true;
+        }
+
+        return false;
+    }
+    
+    
+    public Chromosome mutate(Chromosome victim){
 		Chromosome newChromosome = new Chromosome(maxItems, knapsackCapacity);
 		
 		return newChromosome;	
