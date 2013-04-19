@@ -70,8 +70,6 @@ public class Algorithm {
 	
 	
 	public Chromosome[] crossover(Chromosome[] parents){
-		// Should probably use mutation rate in here to see if we should
-		// mutate the created child or not.
 		Chromosome[] children = new Chromosome[1];
         Chromosome child = new Chromosome(maxItems, knapsackCapacity);
 		
@@ -112,7 +110,8 @@ public class Algorithm {
 
             findAndSetChildWeight(child);
         }
-            
+        
+        child = mutate(child);    
         children[0] = child;        
 
 		return children;
@@ -131,6 +130,38 @@ public class Algorithm {
     
     public Chromosome mutate(Chromosome victim){
 		Chromosome newChromosome = new Chromosome(maxItems, knapsackCapacity);
+        
+        if(random.nextFloat() <= 0.01)
+        {
+            DataElement[] child = victim.getItems();
+            int pos = random.nextInt(child.length);
+            int removedID = child[pos].getID();
+            int weight = victim.getTotalWeight() - child[pos].getWeight();
+            boolean done = false;
+        
+            while(!done)
+            {
+                int elem = random.nextInt(allItems.length);
+                if(!contains(child, allItems[elem]) && (allItems[elem].getID() != removedID) &&
+                    (weight+allItems[elem].getWeight()) < knapsackCapacity)
+                {
+                    child[pos] = allItems[elem];
+                    done = true;
+                }
+            }
+
+            for(int i = 0; i < child.length; i++)
+            {
+                newChromosome.addItem(child[i]);
+            }
+            findAndSetChildScore(newChromosome);
+            findAndSetChildWeight(newChromosome);
+        }
+        else
+        {
+            newChromosome = victim;
+        }
+            
 		
 		return newChromosome;	
 	}
