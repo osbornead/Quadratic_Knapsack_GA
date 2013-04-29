@@ -7,10 +7,9 @@ import java.util.HashMap;
 public class Init {
 
 	public static void main(String[] args){
-		String filename = args[0];
-		int knapsackCapacity = Integer.parseInt(args[1]);
-		int popSize = Integer.parseInt(args[2]);
-        String relationsFilename = args[3];
+        String filename = args[0];
+		int popSize = Integer.parseInt(args[1]);
+        String relationsFilename = args[2];
 		HashMap<TwoInt, Integer> relations;
 
 		FileReader itemsFile;
@@ -23,16 +22,29 @@ public class Init {
 			BufferedReader itemsReader = new BufferedReader(itemsFile);
 			
 			String line;
-			// read first line to get number of items
-			int numItems = Integer.parseInt(itemsReader.readLine());
+			
+            while((line = itemsReader.readLine()).contains("#")) ;
+
+            // read first line to get number of items
+			int numItems = Integer.parseInt(line);
+
 			// Create Item array 
 			DataElement[] items = new DataElement[numItems];
-			
+
+            //read second line to get knapsack capacity.
+            int knapsackCapacity = Integer.parseInt(itemsReader.readLine());
+
 			int itemCounter = 0;
-			while((line = itemsReader.readLine()) != null){
-				String[] splitLine = line.split(",");
-                // Assume line is entered weight, value, ID. 
-				items[itemCounter++] = new DataElement(Integer.parseInt(splitLine[0]), Integer.parseInt(splitLine[1]), Integer.parseInt(splitLine[2]));
+            int IDCounter = 0;
+			while(itemCounter < numItems){
+                
+                line = itemsReader.readLine();
+				String[] splitLine = line.split("[\\s,]+");
+
+                // Assume line is entered value, weight
+                // ID is order in the file. 
+				items[itemCounter++] = new DataElement(Integer.parseInt(splitLine[1]), 
+                                            Integer.parseInt(splitLine[0]), IDCounter++);
 			}
 			
             /*******************
@@ -46,13 +58,15 @@ public class Init {
             // Create relations hashmap
             relations = new HashMap<TwoInt, Integer>(numRelations);
 
-            while((rLine = relationsReader.readLine()) != null)
+            for(int i = 0; i < numRelations; i++)
             {
+                rLine = relationsReader.readLine();
+
                 // Assume line is entered 3,4,10
                 // 3 = first number in key
                 // 4 = second number in key
                 // 10 = value of pair
-                String[] split = line.split(",");
+                String[] split = rLine.split("[,]");
                 TwoInt key = new TwoInt(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
                 Integer value = Integer.parseInt(split[2]);
 

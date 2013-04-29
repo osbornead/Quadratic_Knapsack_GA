@@ -19,19 +19,22 @@ public class Algorithm {
 		this.knapsackCapacity = knapsackCapacity;
 		this.maxItems = allItems.length;
 		this.popSize = popSize;
-		population = new Chromosome[allItems.length];
+		population = new Chromosome[popSize];
 	}
 	
 	public void start(){
 		populate();
-		while(population[0].getTotalValue() != population[population.length-1].getTotalValue()){
+        while(population[0].getTotalValue() != population[popSize-1].getTotalValue()){
 			insertIntoPop(crossover(pickParents())[0]);
 			genCount++;
 		}
+
+        System.out.println("Best: \n"+"Weight: "+population[0].getTotalWeight()+"\n Value: "+
+        population[0].getTotalValue()+"\n Gen: "+genCount);
 	}
 	
 	public void populate(){
-		ArrayList<Integer> availableData= new ArrayList<Integer>();
+        ArrayList<Integer> availableData= new ArrayList<Integer>();
 		int i =0;
 		int index;
 
@@ -40,17 +43,22 @@ public class Algorithm {
 			for(int j=0; j<maxItems;j++){
 				availableData.add(new Integer(j));
 			}
-			boolean added = true;
-			while(added){
-				index = random.nextInt(availableData.size());
-				index = availableData.remove(index);
+			
+            int j = 0;
+			while(j < maxItems){
+                index = random.nextInt(availableData.size());
+                index = availableData.remove(index);
 				DataElement d = allItems[index];
-				added = child.addItem(d);
-			}
+				child.addItem(d);
+			    
+                j++;
+            }
 			insertIntoPop(child);
-			i++;
+            
+            System.out.println(population[i]);
+			
+            i++;
 		}
-
 	}
 	
 	/* pickParents
@@ -76,7 +84,8 @@ public class Algorithm {
         DataElement[] parent1 = parents[0].getItems();
         DataElement[] parent2 = parents[1].getItems();
 
-        int length = parent1.length;
+        int length = parents[0].getLength();
+        int length2 =  parents[1].getLength();
         int p1, p2;
         int i = 0;
 
@@ -86,7 +95,7 @@ public class Algorithm {
             {
                 p1 = random.nextInt(length);
 
-                while(contains(child.getItems(),parent1[p1]))
+                while(contains(child,parent1[p1]))
                 {
                     p1 = random.nextInt(length);
                 }
@@ -96,11 +105,11 @@ public class Algorithm {
 
             else
             {
-                p2 = random.nextInt(length);
+                p2 = random.nextInt(length2);
 
-                while(contains(child.getItems(),parent2[p2]))
+                while(contains(child,parent2[p2]))
                 {
-                    p2 = random.nextInt(length);
+                    p2 = random.nextInt(length2);
                 }
             
                 child.addItem(parent2[p2]);
@@ -112,16 +121,20 @@ public class Algorithm {
         }
         
         child = mutate(child);    
-        children[0] = child;        
+        children[0] = child; 
 
 		return children;
 	}
 	
-	public boolean contains(DataElement[] child, DataElement item)
+	public boolean contains(Chromosome child, DataElement item)
     {
-        for(int i=0;i<child.length;i++)
+        DataElement[] children = child.getItems();
+
+        if(children[0] == null) return false;
+
+        for(int i=0;i<child.getLength();i++)
         {
-            if(child[i].getID() == item.getID()) return true;
+            if(children[i].getID() == item.getID()) return true;
         }
 
         return false;
@@ -134,15 +147,15 @@ public class Algorithm {
         if(random.nextFloat() <= 0.01)
         {
             DataElement[] child = victim.getItems();
-            int pos = random.nextInt(child.length);
+            int pos = random.nextInt(victim.getLength());
             int removedID = child[pos].getID();
             int weight = victim.getTotalWeight() - child[pos].getWeight();
             boolean done = false;
         
             while(!done)
             {
-                int elem = random.nextInt(allItems.length);
-                if(!contains(child, allItems[elem]) && (allItems[elem].getID() != removedID) &&
+                int elem = random.nextInt(maxItems-1);
+                if(!contains(victim, allItems[elem]) && (allItems[elem].getID() != removedID) &&
                     (weight+allItems[elem].getWeight()) < knapsackCapacity)
                 {
                     child[pos] = allItems[elem];
@@ -150,7 +163,7 @@ public class Algorithm {
                 }
             }
 
-            for(int i = 0; i < child.length; i++)
+            for(int i = 0; i < victim.getLength(); i++)
             {
                 newChromosome.addItem(child[i]);
             }
@@ -170,17 +183,28 @@ public class Algorithm {
 		int index = popSize-1;
 		findAndSetChildScore(child);
 		System.out.println("Inserting into pop: "+child.getTotalValue());
-		while(index >= 0 && (population[index] == null || child.getTotalValue() <= population[index].getTotalValue())){
-			if(index != popSize-1){
-				population[index+1] = population[index];
-			}
-	        index--;
-		}
-		if(population[0] != null && child.getTotalValue() < population[0].getTotalValue()){
-			System.out.println("New Best: "+child.print()+"\n Score: "+child.getTotalValue()+"\n Gen: "+genCount);
-		}
-		if(index+1 < popSize)
-			population[index+1] = child;
+		if(population[0] == null) population[0] = child;
+        else
+        {
+            while(index >= 0 && (population[index] == null || child.getTotalValue() >= population[index].getTotalValue())){
+			    if(index != popSize-1){
+				    population[index+1] = population[index];
+			    }
+	            index--;
+            }
+	    	if(population[0] != null && child.getTotalValue() > population[0].getTotalValue()){
+		    	System.out.println("New Best: "+child.getTotalWeight()+"\n Score: "+child.getTotalValue()+"\n Gen: "+genCount);
+		        population[0] = child;
+            }
+		    if(index+1 < popSize && index > 0)
+            {
+                if((population[index].getTotalWeight() != child.getTotalWeight()) && 
+                (population[index].getTotalValue() != child.getTotalValue()))
+                {
+			        population[index+1] = child;
+                }
+            }
+        }
 	}
 	
 
@@ -188,7 +212,9 @@ public class Algorithm {
         DataElement[] values = child.getItems();
         int weight = 0;
         
-        for(int i=0; i < values.length; i++)
+        if(values[0] == null) child.setTotalWeight(0);
+
+        for(int i=0; i < child.getLength(); i++)
         {
             weight += values[i].getWeight();
         }
@@ -203,17 +229,18 @@ public class Algorithm {
 		// calls setScore on the child
 
         DataElement[] values = child.getItems();
+        int length = child.getLength();
         TwoInt key;
         int value = 0;
-
-        for(int i=0;i<values.length;i++)
+        
+        for(int i=0;i<length;i++)
         {
             value += values[i].getValue();
         }
 
-        for(int l=0;l<values.length-1;l++)
+        for(int l=0;l<length-1;l++)
         {
-            for(int j=l+1;j<values.length;j++)
+            for(int j=l+1;j<length;j++)
             {
                 if(values[l].getValue() < values[j].getValue())
                 {

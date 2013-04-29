@@ -9,11 +9,12 @@ public class Chromosome {
 	public Chromosome(int maxItems, int capacity){
 		items = new DataElement[maxItems];
 		this.totalValue = 0;
+        this.totalWeight = 0;
 		this.capacity = capacity;
 	}
 	
 	public boolean addItem(DataElement item){
-		if(totalWeight + item.getWeight() <= capacity){
+        if((totalWeight + item.getWeight()) <= capacity){
 			items[counter++] = item;
 			totalWeight+= item.getWeight();
 			return true;
@@ -40,6 +41,17 @@ public class Chromosome {
 	public DataElement[] getItems(){
 		return items;
 	}
+
+    public int getLength(){
+        int length = 0;
+        while(items[length] != null)
+        {
+            length++;
+        }
+
+        return length;
+    }
+
 	
 	public String print(){
 		String string = "(";
